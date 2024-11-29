@@ -24,8 +24,8 @@ pub async fn function_handler(event: Request) -> Result<impl IntoResponse, Error
             .map_err(Box::new)
     };
 
-    let num: u128 = match event.query_string_parameters().first("number") {
-        Some(num) => match num.parse::<u128>() {
+    let num: u32 = match event.query_string_parameters().first("number") {
+        Some(num) => match num.parse::<u32>() {
             Ok(n) => n,
             Err(_) => {
                 return Ok(bad_request(
@@ -38,21 +38,29 @@ pub async fn function_handler(event: Request) -> Result<impl IntoResponse, Error
 
     let factorial = factorial(num);
 
+    let body_json_parts = json!({
+        "number": num,
+        "result": factorial.to_string(),
+    })
+    .to_string();
+
+    let split = body_json_parts.split("\"").collect::<Vec<&str>>();
+
+    let json = format!("{}\"{}\"{}\"{}\"{}{}{}", split[0], split[1], split[2], split[3], split[4], split[5], split[6]);
+
     let response = Response::builder()
         .status(StatusCode::OK)
         .header("Content-Type", "application/json")
         .body(
-            json!({
-                "number": num,
-                "result": factorial,
-            })
-            .to_string(),
+            json,
         )
         .map_err(Box::new)?;
 
     Ok(response)
 }
 
-fn factorial(num: u128) -> u128 {
-    (1..=num).product()
+use num::{bigint::BigUint, One};
+
+fn factorial(value: u32) -> BigUint {
+    (2..=value).fold(BigUint::one(), |res, n| res * n)
 }
