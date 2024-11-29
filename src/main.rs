@@ -51,9 +51,7 @@ pub async fn function_handler(event: Request) -> Result<impl IntoResponse, Error
     let response = Response::builder()
         .status(StatusCode::OK)
         .header("Content-Type", "application/json")
-        .body(
-            json,
-        )
+        .body(json)
         .map_err(Box::new)?;
 
     Ok(response)
