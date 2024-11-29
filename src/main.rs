@@ -40,13 +40,13 @@ pub async fn function_handler(event: Request) -> Result<impl IntoResponse, Error
 
     let body_json_parts = json!({
         "number": num,
-        "result": factorial.to_string(),
+        "result": -1,
     })
     .to_string();
 
-    let split = body_json_parts.split("\"").collect::<Vec<&str>>();
+    let split = body_json_parts.split("-1").collect::<Vec<&str>>();
 
-    let json = format!("{}\"{}\"{}\"{}\"{}{}{}", split[0], split[1], split[2], split[3], split[4], split[5], split[6]);
+    let json = format!("{}{}{}", split[0], factorial.to_string(), split[1]);
 
     let response = Response::builder()
         .status(StatusCode::OK)
@@ -59,8 +59,8 @@ pub async fn function_handler(event: Request) -> Result<impl IntoResponse, Error
     Ok(response)
 }
 
-use num::{bigint::BigUint, One};
+use rug::Integer;
 
-fn factorial(value: u32) -> BigUint {
-    (2..=value).fold(BigUint::one(), |res, n| res * n)
+fn factorial(value: u32) -> Integer {
+    (2..=value).fold(Integer::ONE.clone(), |res, n| res * n)
 }
